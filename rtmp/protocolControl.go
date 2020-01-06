@@ -10,6 +10,8 @@ import (
 var WindowAcknowledgementSize = 5000000
 var MaxChunkSize = 450000
 
+//var MaxChunkSize =20000
+
 func (this *Session) WriteWindowAcknowledgementSize() {
 	buffer := model.Chunk{
 		BasicHeader: &model.BasicHeader{

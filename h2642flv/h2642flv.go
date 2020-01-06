@@ -84,6 +84,13 @@ func (this *Process) splitFrame() {
 					}
 					frameNum++ //frame数量+1
 					i += 4
+				} else if buf[i] == 0x00 && buf[i+1] == 0x00 && buf[i+2] == 0x01 {
+					if i != 0 {
+						this.frameChan <- frame
+						frame = make([]byte, 0)
+					}
+					frameNum++ //frame数量+1
+					i += 3
 				} else {
 					frame = append(frame, buf[i])
 					i++
@@ -193,8 +200,8 @@ func flvspspps(conn net.Conn, sps []byte, pps []byte) {
 	})
 	data.Write(sps)
 	data.Write([]byte{
-		0x01,       //numOfPictureParamterSets
-		0x00, 0x04, //pictureParameterSetLength
+		0x01,                                //numOfPictureParamterSets
+		byte(len(pps) >> 8), byte(len(pps)), //pictureParameterSetLength
 	})
 	data.Write(pps)
 	writeVideo(conn, data.Bytes())

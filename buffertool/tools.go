@@ -62,30 +62,6 @@ func (i *Buffer) ScanAMFBoolean() bool {
 	return i.ScanByte() != 0
 }
 
-//func (i *Buffer) ScanAMFObject() *amf.Object {
-//	ao := amf.NewObject()
-//	i.ScanByte()
-//	for maker := i.TryBytes(3); !(maker[0] == 0x00 && maker[1] == 0x00 && maker[2] == 0x09); maker = i.TryBytes(3) {
-//		key := i.ScanAMFString()
-//		vtype := i.ScanByte()
-//		var v interface{}
-//		switch vtype {
-//		case AMF0Type.Number:
-//			v = i.ScanAMFNumber()
-//			break
-//		case AMF0Type.String:
-//			v = i.ScanAMFString()
-//			break
-//		case AMF0Type.Boolean:
-//			v = i.ScanAMFBoolean()
-//			break
-//		}
-//		log.Println(key,v)
-//		ao.Put(key, v)
-//	}
-//	return ao
-//}
-
 func Merge(s1 []byte, s2 []byte) []byte {
 	slice := make([]byte, len(s1)+len(s2))
 	copy(slice, s1)
