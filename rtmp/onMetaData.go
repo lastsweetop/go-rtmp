@@ -43,7 +43,7 @@ func (this *Session) OnMetaData() {
 	omdr := OnMetaDataResponse{
 		Name: "onMetaData",
 		MetaData: MetaData{
-			Server:        "NGINX RTMP (github.com/arut/nginx-rtmp-module)",
+			Server:        "https://github.com/lastsweetop/go-rtmp",
 			Width:         1920,
 			Height:        1080,
 			DisplayWidth:  1920,
