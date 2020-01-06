@@ -40,3 +40,7 @@ func (this *Session) handCreateStream(b *buffertool.Buffer, AMFVersion int) {
 	buffer.Payload = payload
 	this.write(buffer.Bytes())
 }
+
+func (this *Session) deleteStream(b *buffertool.Buffer, AMFVersion int) {
+
+}

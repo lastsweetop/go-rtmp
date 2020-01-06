@@ -89,6 +89,9 @@ func (this *Session) pkgChunk() {
 		case 0x04:
 			this.handUserControl(buffertool.NewBuffer(temps), AMFVersion.AMF0)
 			break
+		case 0x03:
+			this.handAcknowledgement(buffertool.NewBuffer(temps), AMFVersion.AMF0)
+
 		}
 	}
 }

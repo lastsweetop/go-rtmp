@@ -12,6 +12,6 @@ func (this *Session) handPlay(b *buffertool.Buffer, version int) {
 	this.RtmpSampleAccess()
 	this.OnMetaData()
 
-	h2642flv.H2642flv("/Users/sweetop/Code/mystudy/golang/goh264/test/source/7.h264",
+	h2642flv.NewProcess().Start("/Users/sweetop/Code/mystudy/golang/goh264/test/source/7.h264",
 		this.Conn)
 }

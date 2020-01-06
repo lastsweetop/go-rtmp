@@ -11,18 +11,25 @@ import (
 	"sync"
 )
 
-var (
-	bufChan         = make(chan []byte, 10)
-	frameChan       = make(chan []byte, 10)
-	closeSplitChan  = false
-	closeDecodeChan = false
-	wg              = sync.WaitGroup{}
+type Process struct {
+	bufChan         chan []byte
+	frameChan       chan []byte
+	closeSplitChan  bool
+	closeDecodeChan bool
+	wg              sync.WaitGroup
+}
 
-	prelen    = 304
-	timestamp = 0
-)
+func NewProcess() *Process {
+	return &Process{
+		bufChan:         make(chan []byte, 10),
+		frameChan:       make(chan []byte, 10),
+		closeSplitChan:  false,
+		closeDecodeChan: false,
+		wg:              sync.WaitGroup{},
+	}
+}
 
-func H2642flv(inPath string, conn net.Conn) {
+func (this *Process) Start(inPath string, conn net.Conn) {
 	fi, err := os.Open(inPath)
 	if err != nil {
 		log.Println("open error : " + err.Error())
@@ -30,8 +37,8 @@ func H2642flv(inPath string, conn net.Conn) {
 	defer fi.Close()
 	r := bufio.NewReader(fi)
 
-	go splitFrame()
-	go decodeFrame(conn)
+	go this.splitFrame()
+	go this.decodeFrame(conn)
 
 	for {
 		buf := make([]byte, 4096)
@@ -42,25 +49,25 @@ func H2642flv(inPath string, conn net.Conn) {
 		if 0 == n {
 			break
 		}
-		bufChan <- buf[:n]
+		this.bufChan <- buf[:n]
 	}
-	closeSplitChan = true
-	wg.Wait()
+	this.closeSplitChan = true
+	this.wg.Wait()
 }
 
-func splitFrame() {
+func (this *Process) splitFrame() {
 	temp := make([]byte, 0)
 	frame := make([]byte, 0)
 	frameNum := 0
 
-	wg.Add(1)
+	this.wg.Add(1)
 	defer func() {
-		wg.Done()
+		this.wg.Done()
 	}()
 
 	for {
 		select {
-		case buf := <-bufChan:
+		case buf := <-this.bufChan:
 			buf = append(temp, buf...) //头部追加上个包剩余不满4个字节的数据
 			temp = make([]byte, 0)
 			i := 0
@@ -72,7 +79,7 @@ func splitFrame() {
 
 				if buf[i] == 0x00 && buf[i+1] == 0x00 && buf[i+2] == 0x00 && buf[i+3] == 0x01 {
 					if i != 0 {
-						frameChan <- frame
+						this.frameChan <- frame
 						frame = make([]byte, 0)
 					}
 					frameNum++ //frame数量+1
@@ -84,10 +91,10 @@ func splitFrame() {
 			}
 			break
 		default:
-			if closeSplitChan {
+			if this.closeSplitChan {
 				frame = append(frame, temp...)
-				frameChan <- frame
-				closeDecodeChan = true
+				this.frameChan <- frame
+				this.closeDecodeChan = true
 				log.Println("关闭切割split协程")
 				log.Println("frame数量：", frameNum)
 				return
@@ -97,12 +104,12 @@ func splitFrame() {
 	}
 }
 
-func decodeFrame(conn net.Conn) {
+func (this *Process) decodeFrame(conn net.Conn) {
 	first := true
 	defer func() {
-		wg.Done()
+		this.wg.Done()
 	}()
-	wg.Add(1)
+	this.wg.Add(1)
 
 	//conn.Write([]byte{0x46, 0x4c, 0x56, 0x01, 0x01, 0x00, 0x00, 0x00, 0x09})
 	//w.Write(getHeader())
@@ -110,7 +117,7 @@ func decodeFrame(conn net.Conn) {
 	tempsps := []byte{}
 	for {
 		select {
-		case frame := <-frameChan:
+		case frame := <-this.frameChan:
 
 			flen := len(frame)
 			i++
@@ -152,7 +159,7 @@ func decodeFrame(conn net.Conn) {
 			}
 			break
 		default:
-			if closeDecodeChan {
+			if this.closeDecodeChan {
 				log.Println("关闭切割decode协程")
 				return
 			}
@@ -203,16 +210,15 @@ func writeAudio(conn net.Conn) {
 func writeVideo(conn net.Conn, payload []byte) {
 	buffer := model.Chunk{
 		BasicHeader: &model.BasicHeader{
-			Fmt:           0,
+			Fmt:           1,
 			ChunkStreamId: ChunkStreamId,
 		},
 		MessageHeader: &model.MessageHeader{
-			Timestamp:       uint32(timestamp),
+			Timestamp:       40,
 			TypeId:          0x09,
 			MessageStreamId: 1,
 		},
 	}
 	buffer.Payload = payload
 	conn.Write(buffer.Bytes())
-	timestamp += 40
 }

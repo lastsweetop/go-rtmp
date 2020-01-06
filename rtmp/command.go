@@ -19,5 +19,8 @@ func (this *Session) handCommand(b *buffertool.Buffer, AMFVersion int) {
 	case "play":
 		this.handPlay(b, AMFVersion)
 		break
+	case "":
+		this.deleteStream(b, AMFVersion)
+		break
 	}
 }

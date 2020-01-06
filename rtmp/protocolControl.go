@@ -82,3 +82,9 @@ func (this *Session) handWindowAcknowledgementSize(b *buffertool.Buffer, AMFVers
 
 	log.Println("WindowAcknowledgementSize:", size)
 }
+
+func (this *Session) handAcknowledgement(b *buffertool.Buffer, AMFVersion int) {
+	size := b.ScanInt()
+
+	log.Println("Client Acknowledgement:", size)
+}
