@@ -15,8 +15,8 @@ type ConnectCommand struct {
 type ConnectResult struct {
 	Name          string
 	TransactionID float64
-	Properties    ConnectResultProperties
-	Information   ConnectResultInformation
+	Properties    *ConnectResultProperties
+	Information   *ConnectResultInformation
 }
 
 type ConnectResultProperties struct {
@@ -55,10 +55,10 @@ func (this *Session) handConnect(b *buffertool.Buffer, AMFVersion int) {
 	sc := ConnectResult{
 		Name:          "_result",
 		TransactionID: tid,
-		Properties: ConnectResultProperties{
+		Properties: &ConnectResultProperties{
 			FmsVer:       "FMS/3,0,1,123",
 			Capabilities: 31,
-		}, Information: ConnectResultInformation{
+		}, Information: &ConnectResultInformation{
 			Level:          "status",
 			Code:           "NetConnection.Connect.Success",
 			Description:    "Connection succeeded",

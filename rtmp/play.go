@@ -1,17 +1,29 @@
 package rtmp
 
 import (
+	"go-rtmp/amf"
 	"go-rtmp/buffertool"
 	"go-rtmp/h2642flv"
+	"log"
 )
 
-func (this *Session) handPlay(b *buffertool.Buffer, version int) {
-	this.StreamBegin()
+type PlayReq struct {
+	TransactionID float64
+	CommandObject interface{}
+	StreamName    string
+	Start         float64
+}
 
+func (this *Session) handPlay(b *buffertool.Buffer, version int) {
+	req := &PlayReq{}
+	amf.UnMarshal(b.RestBytes(), req)
+	log.Println("handPlay", req)
+
+	this.StreamBegin()
 	this.OnStatus()
 	this.RtmpSampleAccess()
 	this.OnMetaData()
 
-	h2642flv.NewProcess().Start("resource/test2.h264",
+	h2642flv.NewProcess().Start("resource/"+req.StreamName,
 		this.Conn)
 }

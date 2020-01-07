@@ -8,18 +8,25 @@ import (
 )
 
 func TestAMF(t *testing.T) {
-	scc := rtmp.ConnectResult{
-		Name:          "connect",
+	scc := &rtmp.ConnectResult{
+		Name:          "_result",
 		TransactionID: 1,
-		Properties: rtmp.ConnectResultProperties{
+		Properties: &rtmp.ConnectResultProperties{
 			FmsVer:       "FMS/3,0,1,123",
 			Capabilities: 31,
-		}, Information: rtmp.ConnectResultInformation{
+		}, Information: &rtmp.ConnectResultInformation{
 			Level:          "status",
 			Code:           "NetConnection.Connect.Success",
-			Description:    "Connection succeeded",
+			Description:    "Connection succeeded.",
 			ObjectEncoding: 0,
 		},
 	}
-	log.Println(amf.Marshal(scc))
+
+	data, _ := amf.Marshal(scc)
+	log.Println(data)
+
+	scc2 := &rtmp.ConnectResult{}
+
+	amf.UnMarshal(data, scc2)
+	log.Println(*scc2.Properties)
 }

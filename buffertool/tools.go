@@ -17,6 +17,10 @@ func NewBuffer(data []byte) *Buffer {
 	}
 }
 
+func (i *Buffer) RestBytes() []byte {
+	return i.data[i.offset/8:]
+}
+
 func (i *Buffer) ScanByteForNBit(N byte) byte {
 	nByte := i.offset / 8
 	fbit := i.offset % 8
